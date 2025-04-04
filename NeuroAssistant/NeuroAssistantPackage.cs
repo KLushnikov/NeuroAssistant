@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
+using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Task = System.Threading.Tasks.Task;
@@ -25,12 +27,16 @@ namespace NeuroAssistant
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]
+    [ProvideMenuResource("NeuroAssistant.ctmenu", 1)]
     public sealed class NeuroAssistantPackage : AsyncPackage
     {
         /// <summary>
         /// NeuroAssistantPackage GUID string.
         /// </summary>
-        public const string PackageGuidString = "2ccf257c-de4c-4c20-892b-5c7a94d923bf";
+        public const string PackageGuidString = "4457B494-5935-483E-89B8-FDE3626E8A7A";
+
+        private const int _commandId = 0x0100;
+        private static readonly Guid _commandSet = new Guid("3A8FF9E2-2ACA-4DA8-A50B-4AB86BF264EE");
 
         #region Package Members
 
@@ -46,6 +52,22 @@ namespace NeuroAssistant
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            var commandService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var menuCommandID = new CommandID(_commandSet, _commandId);
+            var menuItem = new OleMenuCommand(Execute, menuCommandID);
+            commandService?.AddCommand(menuItem);
+        }
+
+        private void Execute(object sender, EventArgs e)
+        {
+            VsShellUtilities.ShowMessageBox(
+                this,
+                "Test",
+                "Test",
+                OLEMSGICON.OLEMSGICON_INFO,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
 
         #endregion
