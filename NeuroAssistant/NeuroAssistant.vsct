@@ -5,7 +5,7 @@
 
 	<Commands package="guidNeuroAssistantPackage">
 		<Menus>
-			<Menu guid="guidNeuroAssistantCommands" id="menuNeuroAssistant" type="Menu">
+			<Menu guid="guidNeuroAssistantCommands" id="menuNeuroAssistant" type="Menu" priority="0x1000">
 				<Parent guid="guidNeuroAssistantCommands" id="groupToolsMenu"/>
 				<Strings>
 					<ButtonText>Neuro Assistant</ButtonText>

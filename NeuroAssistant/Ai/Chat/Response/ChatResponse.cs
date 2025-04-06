@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace NeuroAssistant.Ai.Chat.Response
 {
@@ -10,7 +10,7 @@ namespace NeuroAssistant.Ai.Chat.Response
             Choices = choices;
         }
 
-        [JsonProperty("choices")]
+        [JsonPropertyName("choices")]
         public List<ChatChoice> Choices { get; set; }
     }
 }

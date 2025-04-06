@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace NeuroAssistant.Ai.Chat.Request
 {
@@ -15,16 +15,16 @@ namespace NeuroAssistant.Ai.Chat.Request
             MaxTokens = maxTokens;
         }
 
-        [JsonProperty("model")]
+        [JsonPropertyName("model")]
         public string Model { get; set; }
 
-        [JsonProperty("messages")]
+        [JsonPropertyName("messages")]
         public ChatMessage[] Messages { get; set; }
 
-        [JsonProperty("temperature")]
+        [JsonPropertyName("temperature")]
         public double Temperature { get; set; }
 
-        [JsonProperty("max_tokens")]
+        [JsonPropertyName("max_tokens")]
         public int MaxTokens { get; set; }
     }
 }
