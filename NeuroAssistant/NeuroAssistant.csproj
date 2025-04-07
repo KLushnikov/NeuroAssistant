@@ -51,6 +51,7 @@
     <Compile Include="Ai\Chat\Response\ChatMessageResponse.cs" />
     <Compile Include="Ai\Chat\Request\ChatRequest.cs" />
     <Compile Include="Ai\Chat\Response\ChatResponse.cs" />
+    <Compile Include="Ai\Configurations\AiConnectionSettings.cs" />
     <Compile Include="Git\GitDiffHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NeuroAssistantPackage.cs" />

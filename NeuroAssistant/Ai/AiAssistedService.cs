@@ -1,8 +1,11 @@
-﻿using NeuroAssistant.Ai.Chat.Request;
+﻿using Microsoft.VisualStudio.Shell;
+using NeuroAssistant.Ai.Chat.Request;
 using NeuroAssistant.Ai.Chat.Response;
+using NeuroAssistant.Ai.Configurations;
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -19,16 +22,11 @@ namespace NeuroAssistant.Ai
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        private readonly string _lmUrl, _lmModel;
-        private readonly double _temperature = 0.3;
-        private readonly int _maxTokens = 200;
+        private readonly AiConnectionSettings _aiConnection;
 
-        public AiAssistedService(string lmUrl, string lmModel, double temperature = 0.3, int maxTokens = 200)
+        public AiAssistedService(AiConnectionSettings aiConnection)
         {
-            _lmUrl = lmUrl;
-            _lmModel = lmModel;
-            _temperature = temperature;
-            _maxTokens = maxTokens;
+            _aiConnection = aiConnection;
         }
 
         private async Task<string> GetChatResponseAsync(ChatMessage[] chatMessages)
@@ -36,10 +34,10 @@ namespace NeuroAssistant.Ai
             try
             {
                 var requestBody = new ChatRequest(
-                    model: _lmModel,
+                    model: _aiConnection.Model,
                     messages: chatMessages,
-                    temperature: _temperature,
-                    maxTokens: _maxTokens
+                    temperature: _aiConnection.Temperature,
+                    maxTokens: _aiConnection.MaxTokens
                 );
 
                 var response = await SendChatRequestAsync(requestBody);
@@ -52,17 +50,48 @@ namespace NeuroAssistant.Ai
             }
         }
 
-        private async Task<string> SendChatRequestAsync(ChatRequest request)
+        private async Task<string> SendChatRequestAsync(ChatRequest chatRequest)
         {
-            var jContext = JsonContent.Create(request, options: _jsonOptions);
-            var response = await _httpClient.PostAsync(_lmUrl, jContext);
-            response.EnsureSuccessStatusCode();
+            if (chatRequest == null)
+            {
+                throw new ArgumentNullException(nameof(chatRequest));
+            }
 
-            var responseStream = await response.Content.ReadAsStreamAsync();
-            var responseData = await JsonSerializer.DeserializeAsync<ChatResponse>(responseStream,
-                                                                                   options: _jsonOptions);
+            try
+            {
+                using (var request = new HttpRequestMessage(HttpMethod.Post, _aiConnection.EndpointUrl))
+                {
+                    if (!string.IsNullOrEmpty(_aiConnection.ApiKey))
+                    {
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _aiConnection.ApiKey);
+                    }
 
-            return responseData?.Choices?.FirstOrDefault()?.Message?.Content;
+                    request.Content = JsonContent.Create(chatRequest, options: _jsonOptions);
+
+                    using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false))
+                    {
+                        response.EnsureSuccessStatusCode();
+
+                        var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                        var responseData = await JsonSerializer.DeserializeAsync<ChatResponse>(
+                            responseStream,
+                            options: _jsonOptions).ConfigureAwait(false);
+
+                        return responseData.Choices?.FirstOrDefault()?.Message?.Content
+                            ?? throw new InvalidOperationException("Invalid response format");
+                    }
+
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new Exception($"API Error: {ex.Message}", ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new Exception("Failed to parse API response", ex);
+            }
+
         }
 
         public async Task<string> GenerateCommitMessageAsync(string diff)
