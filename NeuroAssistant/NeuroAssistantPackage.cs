@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NeuroAssistant.Git;
 using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
@@ -61,13 +62,23 @@ namespace NeuroAssistant
 
         private void Execute(object sender, EventArgs e)
         {
-            VsShellUtilities.ShowMessageBox(
-                this,
-                "Test",
-                "Test",
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            try
+            {
+                GitDiffHelper diffHelper = new GitDiffHelper();
+                string diff = diffHelper.GetStagedDiff();
+
+
+            }
+            catch (Exception ex)
+            {
+                VsShellUtilities.ShowMessageBox(
+                    this,
+                    $"{ex.Message}",
+                    "Error",
+                    OLEMSGICON.OLEMSGICON_CRITICAL,
+                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            }
         }
 
         #endregion
