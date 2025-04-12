@@ -29,6 +29,7 @@ namespace NeuroAssistant
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(PackageGuidString)]
     [ProvideMenuResource("NeuroAssistant.ctmenu", 1)]
+    [ProvideToolWindow(typeof(UI.NeuroAssistantWindow))]
     public sealed class NeuroAssistantPackage : AsyncPackage
     {
         /// <summary>
@@ -36,7 +37,7 @@ namespace NeuroAssistant
         /// </summary>
         public const string PackageGuidString = "4457B494-5935-483E-89B8-FDE3626E8A7A";
 
-        private const int _commandId = 0x0100;
+        private const int _createCommitMessageCommandId = 0x0100;
         private static readonly Guid _commandSet = new Guid("3A8FF9E2-2ACA-4DA8-A50B-4AB86BF264EE");
 
         #region Package Members
@@ -52,15 +53,18 @@ namespace NeuroAssistant
         {
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
-            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await UI.NeuroAssistantWindowCommand.InitializeAsync(this);
 
             var commandService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            var menuCommandID = new CommandID(_commandSet, _commandId);
-            var menuItem = new OleMenuCommand(Execute, menuCommandID);
-            commandService?.AddCommand(menuItem);
+
+            var menucreateCommitMessageCommandID = new CommandID(_commandSet, _createCommitMessageCommandId);
+            var menucreateCommitMessageItem = new OleMenuCommand(CreateCommitMessageCommand, menucreateCommitMessageCommandID);
+
+            commandService?.AddCommand(menucreateCommitMessageItem);
         }
 
-        private void Execute(object sender, EventArgs e)
+        private void CreateCommitMessageCommand(object sender, EventArgs e)
         {
             try
             {

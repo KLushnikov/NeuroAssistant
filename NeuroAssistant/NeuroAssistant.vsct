@@ -1,12 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
-	<Extern href="stdidcmd.h"/>
-	<Extern href="vsshlids.h"/>
+	<Extern href="stdidcmd.h" />
+	<Extern href="vsshlids.h" />
 
 	<Commands package="guidNeuroAssistantPackage">
 		<Menus>
-			<Menu guid="guidNeuroAssistantCommands" id="menuNeuroAssistant" type="Menu" priority="0x1000">
-				<Parent guid="guidNeuroAssistantCommands" id="groupToolsMenu"/>
+			<Menu guid="guidNeuroAssistantCommands" id="menuNeuroAssistant" priority="0x1000" type="Menu" >
+				<Parent guid="guidNeuroAssistantCommands" id="groupToolsMenu" />
 				<Strings>
 					<ButtonText>Neuro Assistant</ButtonText>
 				</Strings>
@@ -15,7 +15,7 @@
 		
 		<Groups>
 			<Group guid="guidNeuroAssistantCommands" id="groupToolsMenu" priority="0x0600">
-				<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
 			</Group>
 			
 			<Group guid="guidNeuroAssistantCommands" id="groupButton" priority="0x0600">
@@ -24,25 +24,33 @@
 		</Groups>
 
 		<Buttons>
-			<Button guid="guidNeuroAssistantCommands" id="cmdCreateCommitMessage" priority="0x0100" type="Button">
-				<Parent guid="guidNeuroAssistantCommands" id="groupButton"/>
+			<Button guid="guidNeuroAssistantCommands" id="createCommitMessageCommand" priority="0x0100" type="Button">
+				<Parent guid="guidNeuroAssistantCommands" id="groupButton" />
 				<Strings>
 					<ButtonText>Create commit message</ButtonText>
 					<ToolTipText>Create AI-powered commit message from staged changes</ToolTipText>
 					<CommandName>CreateCommitMessageCommand</CommandName>
 				</Strings>
 			</Button>
+			
+			<Button guid="guidNeuroAssistantCommands" id="neuroAssistantWindowCommand" priority="0x0200" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
+				<Strings>
+					<ButtonText>Neuro Assistant</ButtonText>
+				</Strings>
+			</Button>
 		</Buttons>
-	</Commands>
+  </Commands>
 
 	<Symbols>
-		<GuidSymbol name="guidNeuroAssistantPackage" value="{4457B494-5935-483E-89B8-FDE3626E8A7A}"/>
+		<GuidSymbol name="guidNeuroAssistantPackage" value="{4457B494-5935-483E-89B8-FDE3626E8A7A}" />
 
 		<GuidSymbol name="guidNeuroAssistantCommands" value="{3A8FF9E2-2ACA-4DA8-A50B-4AB86BF264EE}">
-			<IDSymbol name="groupToolsMenu" value="0x1000"/>
-			<IDSymbol name="groupButton" value="0x1001"/>
-			<IDSymbol name="menuNeuroAssistant" value="0x2000"/>
-			<IDSymbol name="cmdCreateCommitMessage" value="0x0100"/>
+			<IDSymbol name="groupToolsMenu" value="0x1000" />
+			<IDSymbol name="groupButton" value="0x1001" />
+			<IDSymbol name="menuNeuroAssistant" value="0x2000" />
+			<IDSymbol name="createCommitMessageCommand" value="0x0100" />
+			<IDSymbol name="neuroAssistantWindowCommand" value="0x0200"/>
 		</GuidSymbol>
-	</Symbols>
+  </Symbols>
 </CommandTable>
