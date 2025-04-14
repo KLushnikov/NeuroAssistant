@@ -6,7 +6,7 @@ namespace NeuroAssistant.Ai.Connection
     /// <summary>
     /// Represents AI connection settings configuration
     /// </summary>
-    internal class AiConnectionSettings : IAiConnectionSettings
+    public class AiConnectionSettings : IAiConnectionSettings
     {
         [JsonPropertyName("profile_name")]
         public string ProfileName { get; set; }

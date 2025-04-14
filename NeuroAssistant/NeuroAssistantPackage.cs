@@ -1,6 +1,13 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Community.VisualStudio.Toolkit;
+using Community.VisualStudio.Toolkit.DependencyInjection.Microsoft;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using NeuroAssistant.Ai;
+using NeuroAssistant.Ai.Profiles;
+using NeuroAssistant.Core.Services;
 using NeuroAssistant.Git;
+using NeuroAssistant.UI;
 using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
@@ -30,7 +37,7 @@ namespace NeuroAssistant
     [Guid(PackageGuidString)]
     [ProvideMenuResource("NeuroAssistant.ctmenu", 1)]
     [ProvideToolWindow(typeof(UI.NeuroAssistantWindow))]
-    public sealed class NeuroAssistantPackage : AsyncPackage
+    public sealed class NeuroAssistantPackage : MicrosoftDIToolkitPackage<NeuroAssistantPackage>
     {
         /// <summary>
         /// NeuroAssistantPackage GUID string.
@@ -41,6 +48,17 @@ namespace NeuroAssistant
         private static readonly Guid _commandSet = new Guid("3A8FF9E2-2ACA-4DA8-A50B-4AB86BF264EE");
 
         #region Package Members
+        protected override void InitializeServices(IServiceCollection services)
+        {
+            services.AddTransient<IEncryptionService, EncryptionService>();
+            services.AddTransient<IVsSettingsStoreService, VsSettingsStoreService>();
+            services.AddTransient<IAiProfileManager, AiProfileManager>();
+
+            services.AddTransient<AiProfileManager>();
+            services.AddTransient<AiAssistedService>();
+            services.AddTransient<NeuroAssistantWindow>();
+            services.RegisterCommands(ServiceLifetime.Singleton);
+        }
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -51,6 +69,8 @@ namespace NeuroAssistant
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
+            await base.InitializeAsync(cancellationToken, progress);
+
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -70,7 +90,6 @@ namespace NeuroAssistant
             {
                 GitDiffHelper diffHelper = new GitDiffHelper();
                 string diff = diffHelper.GetStagedDiff();
-
 
             }
             catch (Exception ex)

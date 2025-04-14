@@ -7,27 +7,26 @@ namespace NeuroAssistant.Core.Services
     /// <summary>
     /// Provides encryption/decryption functionality
     /// </summary>
-    internal interface IEncryptionService
+    public interface IEncryptionService
     {
         /// <summary>
         /// Encrypts a plain text string
         /// </summary>
         /// <param name="input">Plain text to encrypt</param>
         /// <returns>Base64-encoded encrypted data</returns>
-        string Decrypt(string encrypted);
-
+        string Encrypt(string input);
         /// <summary>
         /// Decrypts data encrypted
         /// </summary>
         /// <param name="encrypted">Base64-encoded encrypted data</param>
         /// <returns>Decrypted plain text</returns>
-        string Encrypt(string input);
+        string Decrypt(string encrypted);
     }
 
     /// <summary>
     /// DPAPI-based implementation of IEncryptionService
     /// </summary>
-    internal class EncryptionService : IEncryptionService
+    public class EncryptionService : IEncryptionService
     {
         /// <summary>
         /// Encrypts data using CurrentUser scope without additional entropy
@@ -48,7 +47,7 @@ namespace NeuroAssistant.Core.Services
         }
 
         /// <summary>
-        /// Decrypts data encrypted with the Encrypt method
+        /// Decrypts data encrypted
         /// </summary>
         /// <exception cref="CryptographicException">
         /// Thrown for invalid/malformed input or if decryption fails

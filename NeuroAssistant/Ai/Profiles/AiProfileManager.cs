@@ -9,9 +9,48 @@ using System.Linq;
 namespace NeuroAssistant.Ai.Profiles
 {
     /// <summary>
+    /// Interface manages AI connection profiles by storing and retrieving settings
+    /// </summary>
+    public interface IAiProfileManager
+    {
+        /// <summary>
+        /// Removes a profile and its associated settings
+        /// </summary>
+        /// <param name="profileName">Name of the profile to delete</param>
+        void DeleteProfile(string profileName);
+        /// <summary>
+        /// Retrieves all stored profile names from the settings store
+        /// </summary>
+        /// <returns>List of profile names</returns>
+        List<string> GetProfileIds();
+        /// <summary>
+        /// Loads a specific profile from the settings store
+        /// </summary>
+        /// <typeparam name="T">Type implementing IAiConnectionSettings with parameterless constructor</typeparam>
+        /// <param name="profileName">Name of the profile to load</param>
+        /// <returns>Initialized settings object</returns>
+        IAiConnectionSettings LoadProfile<T>(string profileName) where T : IAiConnectionSettings, new();
+        /// <summary>
+        /// Saves or updates a connection profile in the settings store
+        /// </summary>
+        /// <param name="settings">Profile settings to persist</param>
+        void SaveProfile(IAiConnectionSettings settings);
+        /// <summary>
+        /// Retrieves the name of the last used profile from the settings store
+        /// </summary>
+        /// <returns>Last used profile name or empty string if not set</returns>
+        string GetLastProfile();
+        /// <summary>
+        /// Saves the name of the last used profile to the settings store
+        /// </summary>
+        /// <param name="lastProfileName">Name of the last used profile to store</param>
+        void SetLastProfile(string lastProfileName);
+    }
+
+    /// <summary>
     /// Manages AI connection profiles by storing and retrieving settings from the Visual Studio settings store
     /// </summary>
-    internal class AiProfileManager
+    public class AiProfileManager : IAiProfileManager
     {
         public IVsSettingsStoreService _settingsStoreService;
 
@@ -136,6 +175,17 @@ namespace NeuroAssistant.Ai.Profiles
             {
                 _settingsStoreService.DeleteProperty(profileName, keys[i]);
             }
+        }
+
+        public string GetLastProfile()
+        {
+            _settingsStoreService.GetStringOrDefault("LastProfile", string.Empty, out string value);
+            return value;
+        }
+
+        public void SetLastProfile(string lastProfileName)
+        {
+            _settingsStoreService.SetString("LastProfile", lastProfileName);
         }
     }
 }

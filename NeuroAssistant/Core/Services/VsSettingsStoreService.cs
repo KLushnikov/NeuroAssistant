@@ -1,16 +1,15 @@
 ﻿using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell.Settings;
 using System;
+using System.Runtime.InteropServices;
 
 namespace NeuroAssistant.Core.Services
 {
     /// <summary>
     /// Service for interacting with Visual Studio settings store.
     /// </summary>
-    internal interface IVsSettingsStoreService
+    public interface IVsSettingsStoreService
     {
         /// <summary>
         /// Retrieves a string value from the settings store or returns a default value
@@ -130,15 +129,23 @@ namespace NeuroAssistant.Core.Services
             _encryptionService = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
 
             // Initializing Visual Studio settings store
-            var settingsManager = new ShellSettingsManager(ServiceProvider.GlobalProvider);
-            _writableStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings) as IVsWritableSettingsStore;
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            if (_writableStore == null)
+            IVsSettingsManager settingsManager = Package.GetGlobalService(typeof(SVsSettingsManager)) as IVsSettingsManager
+                ?? throw new InvalidOperationException("Не удалось получить IVsSettingsManager");
+
+            var hResult = settingsManager.GetWritableSettingsStore(
+                (uint)__VsSettingsScope.SettingsScope_UserSettings,
+                out IVsWritableSettingsStore writableStore);
+
+            if (hResult != VSConstants.S_OK || writableStore == null)
             {
-                throw new InvalidOperationException("Failed to initialize the writable settings store.");
+                throw new COMException($"Failed to initialize the writable settings store. HRESULT: {hResult}");
             }
 
-            var hResult = _writableStore.CollectionExists(_collectionGuid, out int existe);
+            _writableStore = writableStore;
+
+            hResult = _writableStore.CollectionExists(_collectionGuid, out int existe);
             if (hResult == VSConstants.S_OK && existe == 0)
             {
                 hResult = _writableStore.CreateCollection(_collectionGuid);
