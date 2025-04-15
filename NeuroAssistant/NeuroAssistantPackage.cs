@@ -7,7 +7,6 @@ using NeuroAssistant.Ai;
 using NeuroAssistant.Ai.Profiles;
 using NeuroAssistant.Core.Services;
 using NeuroAssistant.Git;
-using NeuroAssistant.UI;
 using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
@@ -54,10 +53,11 @@ namespace NeuroAssistant
             services.AddTransient<IVsSettingsStoreService, VsSettingsStoreService>();
             services.AddTransient<IAiProfileManager, AiProfileManager>();
 
-            services.AddTransient<AiProfileManager>();
+            services.AddSingleton<AiProfileManager>();
             services.AddTransient<AiAssistedService>();
-            services.AddTransient<NeuroAssistantWindow>();
+
             services.RegisterCommands(ServiceLifetime.Singleton);
+            var serviceProvider = services.BuildServiceProvider();
         }
 
         /// <summary>

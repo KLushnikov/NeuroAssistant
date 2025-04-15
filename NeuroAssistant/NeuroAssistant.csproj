@@ -56,6 +56,7 @@
     <Compile Include="Ai\Connection\AiConnectionSettings.cs" />
     <Compile Include="Ai\Profiles\AiProfileManager.cs" />
     <Compile Include="Ai\Connection\IAiConnectionSettings.cs" />
+    <Compile Include="Core\Enum\NeuroAssistantResult.cs" />
     <Compile Include="Core\RelayCommand.cs" />
     <Compile Include="Core\Services\EncryptionService.cs" />
     <Compile Include="Core\Services\VsSettingsStoreService.cs" />

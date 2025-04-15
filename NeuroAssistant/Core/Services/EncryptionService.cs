@@ -28,9 +28,7 @@ namespace NeuroAssistant.Core.Services
     /// </summary>
     public class EncryptionService : IEncryptionService
     {
-        /// <summary>
-        /// Encrypts data using CurrentUser scope without additional entropy
-        /// </summary>
+        /// <inheritdoc/>
         public string Encrypt(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -46,12 +44,7 @@ namespace NeuroAssistant.Core.Services
             return Convert.ToBase64String(encryptedData);
         }
 
-        /// <summary>
-        /// Decrypts data encrypted
-        /// </summary>
-        /// <exception cref="CryptographicException">
-        /// Thrown for invalid/malformed input or if decryption fails
-        /// </exception>
+        /// <inheritdoc/>
         public string Decrypt(string encrypted)
         {
             if (string.IsNullOrEmpty(encrypted))

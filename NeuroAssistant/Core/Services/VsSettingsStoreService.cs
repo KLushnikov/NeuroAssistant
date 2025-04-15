@@ -170,29 +170,34 @@ namespace NeuroAssistant.Core.Services
             }
         }
 
+
         /// <summary>
         /// Combines tag and key into a composite property name using "{tag}_{key}" format.
         /// </summary>
         private string GetCompositePropertyName(string tag, string key) => $"{tag}_{key}";
 
+        /// <inheritdoc/>
         public int GetStringOrDefault(string propertyName, string defaultValue, out string value)
         {
             ValidateStringArgument(propertyName, nameof(propertyName));
             return _writableStore.GetStringOrDefault(_collectionGuid, propertyName, defaultValue, out value);
         }
 
+        /// <inheritdoc/>
         public int SetString(string propertyName, string value)
         {
             ValidateStringArgument(propertyName, nameof(propertyName));
             return _writableStore.SetString(_collectionGuid, propertyName, value ?? string.Empty);
         }
 
+        /// <inheritdoc/>
         public int DeleteProperty(string propertyName)
         {
             ValidateStringArgument(propertyName, nameof(propertyName));
             return _writableStore.DeleteProperty(_collectionGuid, propertyName);
         }
 
+        /// <inheritdoc/>
         public int DeleteProperty(string tag, string key)
         {
             ValidateStringArgument(tag, nameof(tag));
@@ -202,6 +207,7 @@ namespace NeuroAssistant.Core.Services
             return DeleteProperty(propertyName);
         }
 
+        /// <inheritdoc/>
         public int GetTagValue(string tag, string key, out string value)
         {
             ValidateStringArgument(tag, nameof(tag));
@@ -211,6 +217,7 @@ namespace NeuroAssistant.Core.Services
             return GetStringOrDefault(propertyName, string.Empty, out value);
         }
 
+        /// <inheritdoc/>
         public int GetTagDecryptValue(string tag, string key, out string value)
         {
             var result = GetTagValue(tag, key, out value);
@@ -218,6 +225,7 @@ namespace NeuroAssistant.Core.Services
             return result;
         }
 
+        /// <inheritdoc/>
         public int SetTagValue(string tag, string key, string value)
         {
             ValidateStringArgument(tag, nameof(tag));
@@ -227,6 +235,7 @@ namespace NeuroAssistant.Core.Services
             return SetString(propertyName, value ?? string.Empty);
         }
 
+        /// <inheritdoc/>
         public int SetTagEncryptValue(string tag, string key, string value)
         {
             if (value == null)

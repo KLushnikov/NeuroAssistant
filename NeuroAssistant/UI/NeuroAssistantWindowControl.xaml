@@ -4,103 +4,129 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-             xmlns:core="clr-namespace:NeuroAssistant.Core" 
-             xmlns:ui="clr-namespace:NeuroAssistant.UI" 
+             xmlns:core="clr-namespace:NeuroAssistant.Core"
+             xmlns:ui="clr-namespace:NeuroAssistant.UI"
              Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
              Name="NeuroAssistantWindow">
     <Grid>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-            <RowDefinition/>
+            <RowDefinition Height="25" />
+            <RowDefinition />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="3">
-            <ComboBox DockPanel.Dock="Left" 
+        <DockPanel Grid.Row="0"
+                   Margin="5,5,5,0">
+            <ComboBox DockPanel.Dock="Left"
                       Width="200"
                       DataContext="{Binding AiProfileNames}"
-                      SelectedItem="{Binding AiProfileNameSelected}"/>
-            <Button HorizontalAlignment="Right" 
-                    DockPanel.Dock="Right" 
+                      SelectedItem="{Binding AiProfileNameSelected}" />
+            <Button HorizontalAlignment="Right"
+                    DockPanel.Dock="Right"
                     Width="20"
-                    Command="{Binding SettingEditCommand}"/>
+                    Command="{Binding SwitchShowSettingCommand}" />
         </DockPanel>
 
         <Grid Grid.Row="1"
               x:Name="AiMessageGrid"
               Visibility="{Binding AiMessageGridVisibility}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="0" 
+            <TextBox Grid.Row="0"
                      Margin="5,5,5,0"
-                     Text="{Binding AiMessage}"/>
+                     Text="{Binding AiMessage}" />
 
             <Button Grid.Row="1"
                     Margin="5,0"
                     Content="Send"
-                    Command="{Binding SendCommand}"/>
+                    Command="{Binding SendToAiCommand}" />
 
             <WebBrowser Grid.Row="2"
                         Margin="5"
-                        core:WebBrowserHelper.HtmlContent ="{Binding HtmlContent}" />
+                        core:WebBrowserHelper.HtmlContent="{Binding HtmlContent}" />
         </Grid>
 
         <Grid Grid.Row="1"
-              Margin="10"
+              Margin="5"
               x:Name="SettingGrid"
               Visibility="{Binding SettingGridVisibility}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="25" />
             </Grid.RowDefinitions>
-            
+
             <StackPanel Grid.Row="0">
                 <TextBlock Text="Profile name" />
-                <TextBox Margin="0,5,0,3" 
-                         Text="{Binding AiProfileSelected.ProfileName}"/>
+                <TextBox Margin="0,5,0,3"
+                         Text="{Binding AiProfileSelected.ProfileName}" />
             </StackPanel>
 
             <StackPanel Grid.Row="1">
                 <TextBlock Text="Url" />
-                <TextBox Margin="0,5,0,3" 
-                         Text="{Binding AiProfileSelected.EndpointUrl}"/>
+                <TextBox Margin="0,5,0,3"
+                         Text="{Binding AiProfileSelected.EndpointUrl}" />
             </StackPanel>
 
             <StackPanel Grid.Row="2">
                 <TextBlock Text="Api key" />
-                <TextBox Margin="0,5,0,3" 
-                         Text="{Binding AiProfileSelected.ApiKey}"/>
+                <TextBox Margin="0,5,0,3"
+                         Text="{Binding AiProfileSelected.ApiKey}" />
             </StackPanel>
 
             <StackPanel Grid.Row="3">
                 <TextBlock Text="Model" />
-                <TextBox Margin="0,5,0,3" 
-                         Text="{Binding AiProfileSelected.Model}"/>
+                <TextBox Margin="0,5,0,3"
+                         Text="{Binding AiProfileSelected.Model}" />
             </StackPanel>
 
             <StackPanel Grid.Row="4">
                 <TextBlock Text="Temperature" />
-                <TextBox Margin="0,5,0,3"  
-                         Text="{Binding AiProfileSelected.Temperature}"/>
+                <TextBox Margin="0,5,0,3"
+                         Text="{Binding AiProfileSelected.Temperature}" />
             </StackPanel>
 
             <StackPanel Grid.Row="5">
                 <TextBlock Text="Max tokens" />
-                <TextBox Margin="0,5,0,3" 
-                         Text="{Binding AiProfileSelected.MaxTokens}"/>
+                <TextBox Margin="0,5,0,3"
+                         Text="{Binding AiProfileSelected.MaxTokens}" />
             </StackPanel>
+
+            <Grid Grid.Row="7">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+
+                <Button HorizontalAlignment="Right"
+                        Grid.Column="1"
+                        Margin="3"
+                        Content="Save"
+                        Width="70"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding SaveSettingCommand}" />
+
+                <Button HorizontalAlignment="Right"
+                        Grid.Column="2"
+                        Margin="3"
+                        Width="70"
+                        Content="Cancel"
+                        Command="{Binding CancelSettingCommand}" />
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>

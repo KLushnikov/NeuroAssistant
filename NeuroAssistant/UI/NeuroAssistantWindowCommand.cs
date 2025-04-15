@@ -96,7 +96,7 @@ namespace NeuroAssistant.UI
                 }
             })
             // Register error handling for fire-and-forget operation
-            .FileAndForget("NeuroAssistantWindowCommand"); ;
+            .FileAndForget("NeuroAssistantWindowCommand");
         }
     }
 }

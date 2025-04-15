@@ -1,6 +1,15 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using NeuroAssistant.Ai.Connection;
+using NeuroAssistant.Ai.Profiles;
+using NeuroAssistant.Core;
+using NeuroAssistant.Core.Enum;
 using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Input;
 
 namespace NeuroAssistant.UI
 {
@@ -16,19 +25,158 @@ namespace NeuroAssistant.UI
     /// </para>
     /// </remarks>
     [Guid("1ac05b52-bbde-458c-8fab-d0bca63818e8")]
-    public class NeuroAssistantWindow : ToolWindowPane
+    public class NeuroAssistantWindow : ToolWindowPane, INotifyPropertyChanged
     {
+        private string _aiMessage;
+
+        private string _aiProfileNameSelected;
+        private IAiConnectionSettings _aiProfileSelected = null;
+
+        private Visibility _aiMessageGridVisibility = Visibility.Visible,
+            _settingGridVisibility = Visibility.Collapsed;
+
+        private IAiProfileManager _aiProfileManager;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NeuroAssistantWindow"/> class.
         /// </summary>
-        public NeuroAssistantWindow() : base(null)
+        public NeuroAssistantWindow(IAiProfileManager aiProfileManager) : base(null)
         {
-            this.Caption = "Neuro Assistant";
+            _aiProfileManager = aiProfileManager;
 
+            Caption = "Neuro Assistant";
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
             // the object returned by the Content property.
-            this.Content = new NeuroAssistantWindowControl();
+            var control = new NeuroAssistantWindowControl
+            {
+                DataContext = this
+            };
+
+            Content = control;
+
+            var profiles = _aiProfileManager.GetProfileIds();
+
+            if (profiles.Count > 0)
+            {
+                AiProfileNames = new ObservableCollection<string>(profiles);
+
+                string lastProfileName = _aiProfileManager.GetLastProfile();
+                if (!string.IsNullOrWhiteSpace(lastProfileName))
+                {
+                    AiProfileNameSelected = lastProfileName;
+                }
+                else
+                {
+                    AiProfileNameSelected = AiProfileNames[0];
+                }
+            }
+            else
+            {
+                AiProfileSelected = new AiConnectionSettings();
+                SwitchShowSetting();
+            }
+
+            SaveSettingCommand = CommandFactory.CreateCommand(SaveSetting);
+            CancelSettingCommand = CommandFactory.CreateCommand(CancelSetting);
+            SwitchShowSettingCommand = CommandFactory.CreateCommand(SwitchShowSetting);
+            SendToAiCommand = CommandFactory.CreateCommand(SendToAi);
         }
+
+        public ICommand SaveSettingCommand { get; set; }
+        public ICommand CancelSettingCommand { get; set; }
+        public ICommand SwitchShowSettingCommand { get; set; }
+        public ICommand SendToAiCommand { get; set; }
+
+        public ObservableCollection<string> AiProfileNames { get; }
+
+        public string AiProfileNameSelected
+        {
+            get => _aiProfileNameSelected;
+            set
+            {
+                _aiProfileNameSelected = value;
+                AiProfileSelected = _aiProfileManager.LoadProfile<AiConnectionSettings>(value);
+                _aiProfileManager.SetLastProfile(value);
+                NotifyPropertyChanged(nameof(AiProfileNameSelected));
+            }
+        }
+
+        public string AiMessage
+        {
+            get => _aiMessage;
+            set
+            {
+                _aiMessage = value;
+                NotifyPropertyChanged(nameof(AiMessage));
+            }
+        }
+        public Visibility AiMessageGridVisibility
+        {
+            get => _aiMessageGridVisibility;
+            set
+            {
+                _aiMessageGridVisibility = value;
+                NotifyPropertyChanged(nameof(AiMessageGridVisibility));
+            }
+        }
+        public Visibility SettingGridVisibility
+        {
+            get => _settingGridVisibility;
+            set
+            {
+                _settingGridVisibility = value;
+                NotifyPropertyChanged(nameof(SettingGridVisibility));
+            }
+        }
+
+        public IAiConnectionSettings AiProfileSelected
+        {
+            get => _aiProfileSelected;
+            set
+            {
+                _aiProfileSelected = value;
+                NotifyPropertyChanged(nameof(AiProfileSelected));
+            }
+        }
+
+        private void SwitchShowSetting()
+        {
+            AiMessageGridVisibility = AiMessageGridVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            SettingGridVisibility = SettingGridVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void CancelSetting()
+        {
+            SwitchShowSetting();
+        }
+
+        private void SaveSetting()
+        {
+            var result = _aiProfileManager.SaveProfile(_aiProfileSelected);
+
+            if (result == NeuroAssistantResult.AddNewItem)
+            {
+                AiProfileNames.Add(_aiProfileSelected.ProfileName);
+                AiProfileNameSelected = _aiProfileSelected.ProfileName;
+            }
+
+            SwitchShowSetting();
+        }
+
+        private void SendToAi()
+        {
+            throw new NotImplementedException();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        // This method is called by the Set accessor of each property.  
+        // The CallerMemberName attribute that is applied to the optional propertyName  
+        // parameter causes the property name of the caller to be substituted as an argument.  
+        private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+
+
     }
 }
