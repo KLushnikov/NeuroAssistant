@@ -151,7 +151,7 @@ namespace NeuroAssistant.Ai.Profiles
                         EndpointUrl = endpointUrl,
                         Model = model,
                         MaxTokens = int.Parse(maxTokens),
-                        Temperature = double.Parse(temperature),
+                        Temperature = double.Parse(temperature, CultureInfo.InvariantCulture),
                     };
                 }
 
