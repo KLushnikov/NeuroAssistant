@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿using Newtonsoft.Json;
 
 namespace NeuroAssistant.Ai.Chat.Response
 {
@@ -9,7 +9,7 @@ namespace NeuroAssistant.Ai.Chat.Response
             Content = content;
         }
 
-        [JsonPropertyName("content")]
+        [JsonProperty("content")]
         public string Content { get; set; }
     }
 }

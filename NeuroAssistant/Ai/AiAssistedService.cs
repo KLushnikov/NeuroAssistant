@@ -2,13 +2,12 @@
 using NeuroAssistant.Ai.Chat.Request;
 using NeuroAssistant.Ai.Chat.Response;
 using NeuroAssistant.Ai.Connection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,10 +20,10 @@ namespace NeuroAssistant.Ai
     {
         private bool _disposed;
         private static readonly HttpClient _httpClient = new HttpClient();
-        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        private readonly JsonSerializerSettings _jsonSettings = new JsonSerializerSettings
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            NullValueHandling = NullValueHandling.Ignore
         };
 
         private readonly IAiConnectionSettings _aiConnection;
@@ -88,7 +87,8 @@ namespace NeuroAssistant.Ai
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _aiConnection.ApiKey);
                 }
 
-                request.Content = JsonContent.Create(chatRequest, options: _jsonOptions);
+                var jsonContent = JsonConvert.SerializeObject(chatRequest, _jsonSettings);
+                request.Content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
                 using (var response = await _httpClient.SendAsync(
                     request,
@@ -97,10 +97,8 @@ namespace NeuroAssistant.Ai
                 {
                     response.EnsureSuccessStatusCode();
 
-                    var responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                    var responseData = await JsonSerializer.DeserializeAsync<ChatResponse>(
-                        responseStream,
-                        options: _jsonOptions);
+                    var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var responseData = JsonConvert.DeserializeObject<ChatResponse>(responseContent, _jsonSettings);
 
                     return responseData.Choices?.FirstOrDefault()?.Message?.Content
                         ?? throw new InvalidOperationException("Invalid response format");

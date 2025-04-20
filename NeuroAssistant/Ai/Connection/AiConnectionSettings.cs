@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Text.Json.Serialization;
 
 namespace NeuroAssistant.Ai.Connection
 {
@@ -8,10 +7,10 @@ namespace NeuroAssistant.Ai.Connection
     /// </summary>
     public class AiConnectionSettings : IAiConnectionSettings
     {
-        [JsonPropertyName("profile_name")]
+        [JsonProperty("profile_name")]
         public string ProfileName { get; set; }
 
-        [JsonPropertyName("endpoint_url")]
+        [JsonProperty("endpoint_url")]
         public string EndpointUrl { get; set; }
 
         [JsonProperty("api_key")]
