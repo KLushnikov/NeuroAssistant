@@ -44,7 +44,7 @@ namespace NeuroAssistant.Ai
         /// <param name="chatMessages">Array of chat messages for context</param>
         /// <returns>Generated response content or error message</returns>
         private async Task<string> GetChatResponseAsync(ChatMessage[] chatMessages,
-                                                        CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace NeuroAssistant.Ai
         /// <exception cref="ArgumentNullException">Thrown when chatRequest is null</exception>
         /// <exception cref="InvalidOperationException">Thrown for invalid response format</exception>
         private async Task<string> SendChatRequestAsync(ChatRequest chatRequest,
-                                                        CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
         {
             if (chatRequest == null)
             {
@@ -113,7 +113,7 @@ namespace NeuroAssistant.Ai
         /// <param name="diff">Code difference content</param>
         /// <returns>Formatted commit message or error information</returns>
         public async Task<string> GenerateCommitMessageAsync(string diff,
-                                                             CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(diff))
             {
@@ -123,7 +123,23 @@ namespace NeuroAssistant.Ai
             ChatMessage[] chatMessages = new[]
             {
                 new ChatMessage("system","You are a C# expert. Generate a commit message in Conventional Commits format."),
-                new ChatMessage("user", $"Analyze this diff:\n\n{diff}")
+                new ChatMessage("user", $"Analyze this diff: {diff}"),
+            };
+
+            return await GetChatResponseAsync(chatMessages, cancellationToken);
+        }
+
+        public async Task<string> SentMessageAsync(string message,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return "Error: Empty content";
+            }
+
+            ChatMessage[] chatMessages = new[]
+            {
+                new ChatMessage("user", $"{message}"),
             };
 
             return await GetChatResponseAsync(chatMessages, cancellationToken);
