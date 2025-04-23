@@ -73,6 +73,7 @@ namespace NeuroAssistant.UI
             }
             else
             {
+                AiProfileNames = new ObservableCollection<string>();
                 AiProfileSelected = new AiConnectionSettings();
                 SwitchShowSetting();
             }
@@ -80,7 +81,7 @@ namespace NeuroAssistant.UI
             SaveSettingCommand = CommandFactory.CreateCommand(SaveSetting);
             CancelSettingCommand = CommandFactory.CreateCommand(CancelSetting);
             SwitchShowSettingCommand = CommandFactory.CreateCommand(SwitchShowSetting);
-            SendToAiCommand = CommandFactory.CreateCommand(SendToAi);
+            SendToAiCommand = CommandFactory.CreateCommand(SentToAiMessage);
         }
 
         public ICommand SaveSettingCommand { get; set; }
@@ -88,7 +89,7 @@ namespace NeuroAssistant.UI
         public ICommand SwitchShowSettingCommand { get; set; }
         public ICommand SendToAiCommand { get; set; }
 
-        public ObservableCollection<string> AiProfileNames { get; }
+        public ObservableCollection<string> AiProfileNames { get; private set; }
 
         public string AiProfileNameSelected
         {
@@ -111,6 +112,17 @@ namespace NeuroAssistant.UI
                 NotifyPropertyChanged(nameof(AiMessage));
             }
         }
+
+        public string AiResultContent
+        {
+            get => _aiResultContent;
+            set
+            {
+                _aiResultContent = value;
+                NotifyPropertyChanged(nameof(AiResultContent));
+            }
+        }
+
         public Visibility AiMessageGridVisibility
         {
             get => _aiMessageGridVisibility;
@@ -164,9 +176,20 @@ namespace NeuroAssistant.UI
             SwitchShowSetting();
         }
 
-        private void SendToAi()
+        private void SentToAiMessage()
         {
-            throw new NotImplementedException();
+            var result = Task.Run(async () =>
+            {
+                return await SentToAiMessageAsync(AiMessage);
+            }).ConfigureAwait(false);
+        }
+
+        public async Task<string> SentToAiMessageAsync(string message)
+        {
+            var result = await _aiAssistedService.SentMessageAsync(message).ConfigureAwait(false);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            AiResultContent = result;
+            return result;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

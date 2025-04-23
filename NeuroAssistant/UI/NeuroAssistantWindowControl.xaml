@@ -12,10 +12,111 @@
              d:DesignHeight="300"
              d:DesignWidth="300"
              Name="NeuroAssistantWindow">
-    <Grid>
 
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" />
+            <Setter Property="Margin"
+                    Value="0,5,0,3" />
+        </Style>
+
+        <Style TargetType="TextBox"
+               BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Background"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ComboBoxBackgroundKey}}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" />
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ComboBoxBorderKey}}" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid>
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Background="{TemplateBinding Background}"
+                                          BorderThickness="0" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Padding"
+                    Value="5" />
+        </Style>
+
+        <Style TargetType="Button">
+            <Setter Property="Background"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ButtonTextKey}}" />
+        </Style>
+
+        <Style TargetType="{x:Type ComboBox}">
+            <Setter Property="Background"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}" />
+            <Setter Property="Foreground"
+                    Value="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Grid.Column="2"
+                                          Focusable="false"
+                                          Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}"
+                                          IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}">
+                            </ToggleButton>
+                            <ContentPresenter Name="ContentSite"
+                                              IsHitTestVisible="False"
+                                              VerticalAlignment="Center"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              Margin="8,5" />
+                            <TextBox x:Name="PART_EditableTextBox"
+                                     Visibility="Hidden"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}" />
+                            <Popup Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid  Name="DropDown"
+                                       SnapsToDevicePixels="True"
+                                       MinWidth="{TemplateBinding ActualWidth}"
+                                       MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}" />
+                                    <ScrollViewer SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsSelected"
+                         Value="True">
+                    <Setter Property="Background"
+                            Value="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}" />
+                </Trigger>
+                <Trigger Property="IsMouseOver"
+                         Value="True">
+                    <Setter Property="Background"
+                            Value="{DynamicResource {x:Static vsshell:VsBrushes.ButtonFaceKey}}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
+            <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -23,12 +124,20 @@
                    Margin="5,5,5,0">
             <ComboBox DockPanel.Dock="Left"
                       Width="200"
-                      DataContext="{Binding AiProfileNames}"
+                      ItemsSource="{Binding AiProfileNames}"
                       SelectedItem="{Binding AiProfileNameSelected}" />
+            
             <Button HorizontalAlignment="Right"
                     DockPanel.Dock="Right"
-                    Width="20"
-                    Command="{Binding SwitchShowSettingCommand}" />
+                    Background="{DynamicResource {x:Static SystemColors.GrayTextColor}}"
+                    BorderThickness="0"
+                    Command="{Binding SwitchShowSettingCommand}">
+                <TextBlock FontFamily="Segoe MDL2 Assets"
+                           Padding="0"
+                           Margin="0"
+                           Text="&#xE713;"
+                           FontSize="16" />
+            </Button>
         </DockPanel>
 
         <Grid Grid.Row="1"
@@ -36,22 +145,34 @@
               Visibility="{Binding AiMessageGridVisibility}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100" />
-                <RowDefinition Height="auto" />
+                <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <TextBox Grid.Row="0"
                      Margin="5,5,5,0"
-                     Text="{Binding AiMessage}" />
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding AiMessage}">
+                <TextBox.InputBindings>
+                    <KeyBinding Command="{Binding SendToAiCommand}"
+                                Key="Enter"
+                                Modifiers="Ctrl"/>
+                </TextBox.InputBindings>
+            </TextBox>
 
             <Button Grid.Row="1"
                     Margin="5,0"
                     Content="Send"
                     Command="{Binding SendToAiCommand}" />
 
-            <WebBrowser Grid.Row="2"
-                        Margin="5"
-                        core:WebBrowserHelper.HtmlContent="{Binding HtmlContent}" />
+            <TextBox Grid.Row="2"
+                     Margin="5"
+                     IsReadOnly="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     Text="{Binding AiResultContent}" />
         </Grid>
 
         <Grid Grid.Row="1"
@@ -66,43 +187,37 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="25" />
+                <RowDefinition Height="30" />
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0">
                 <TextBlock Text="Profile name" />
-                <TextBox Margin="0,5,0,3"
-                         Text="{Binding AiProfileSelected.ProfileName}" />
+                <TextBox Text="{Binding AiProfileSelected.ProfileName}" />
             </StackPanel>
 
             <StackPanel Grid.Row="1">
                 <TextBlock Text="Url" />
-                <TextBox Margin="0,5,0,3"
-                         Text="{Binding AiProfileSelected.EndpointUrl}" />
+                <TextBox Text="{Binding AiProfileSelected.EndpointUrl}" />
             </StackPanel>
 
             <StackPanel Grid.Row="2">
                 <TextBlock Text="Api key" />
-                <TextBox Margin="0,5,0,3"
-                         Text="{Binding AiProfileSelected.ApiKey}" />
+                <TextBox Text="{Binding AiProfileSelected.ApiKey}" />
             </StackPanel>
 
             <StackPanel Grid.Row="3">
                 <TextBlock Text="Model" />
-                <TextBox Margin="0,5,0,3"
-                         Text="{Binding AiProfileSelected.Model}" />
+                <TextBox Text="{Binding AiProfileSelected.Model}" />
             </StackPanel>
 
             <StackPanel Grid.Row="4">
                 <TextBlock Text="Temperature" />
-                <TextBox Margin="0,5,0,3"
-                         Text="{Binding AiProfileSelected.Temperature}" />
+                <TextBox Text="{Binding AiProfileSelected.Temperature}" />
             </StackPanel>
 
             <StackPanel Grid.Row="5">
                 <TextBlock Text="Max tokens" />
-                <TextBox Margin="0,5,0,3"
-                         Text="{Binding AiProfileSelected.MaxTokens}" />
+                <TextBox Text="{Binding AiProfileSelected.MaxTokens}" />
             </StackPanel>
 
             <Grid Grid.Row="7">
