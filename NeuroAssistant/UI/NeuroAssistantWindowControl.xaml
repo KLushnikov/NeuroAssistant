@@ -126,7 +126,7 @@
                       Width="200"
                       ItemsSource="{Binding AiProfileNames}"
                       SelectedItem="{Binding AiProfileNameSelected}" />
-            
+
             <Button HorizontalAlignment="Right"
                     DockPanel.Dock="Right"
                     Background="{DynamicResource {x:Static SystemColors.GrayTextColor}}"
@@ -144,31 +144,46 @@
               x:Name="AiMessageGrid"
               Visibility="{Binding AiMessageGridVisibility}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100" />
-                <RowDefinition Height="30" />
+                <RowDefinition Height="160"/>
+                <RowDefinition Height="3" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <TextBox Grid.Row="0"
-                     Margin="5,5,5,0"
-                     TextWrapping="Wrap"
-                     AcceptsReturn="True"
-                     VerticalScrollBarVisibility="Auto"
-                     Text="{Binding AiMessage}">
-                <TextBox.InputBindings>
-                    <KeyBinding Command="{Binding SendToAiCommand}"
-                                Key="Enter"
-                                Modifiers="Ctrl"/>
-                </TextBox.InputBindings>
-            </TextBox>
+            <Grid Grid.Row="0"
+                  Margin="5,5,5,3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
 
-            <Button Grid.Row="1"
-                    Margin="5,0"
-                    Content="Send"
-                    Command="{Binding SendToAiCommand}" />
+                <TextBox Grid.Row="0"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         Text="{Binding AiMessage}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Command="{Binding SendToAiCommand}"
+                                    Key="Enter"
+                                    Modifiers="Ctrl" />
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <Button Grid.Row="1"
+                        Height="30"
+                        VerticalAlignment="Top"
+                        Content="Send"
+                        Command="{Binding SendToAiCommand}" />
+            </Grid>
+            
+            <GridSplitter Grid.Row="1"
+                          Margin="5,0"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Background="#cccccc"
+                          ShowsPreview="True" />
 
             <TextBox Grid.Row="2"
-                     Margin="5"
+                     Margin="5,3,5,5"
                      IsReadOnly="True"
                      TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto"
