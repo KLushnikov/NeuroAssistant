@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
+using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace NeuroAssistant.UI
@@ -76,6 +77,22 @@ namespace NeuroAssistant.UI
             Instance = new NeuroAssistantWindowCommand(package, commandService);
         }
 
+        public async Task<string> SentMessageAsync(string message)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            var window = (NeuroAssistantWindow)await _package.FindToolWindowAsync(
+                typeof(NeuroAssistantWindow),
+                0,
+                true,
+                _package.DisposalToken
+            );
+
+            if (window?.Frame == null) throw new NotSupportedException("Cannot create tool window");
+
+            return await window.SentToAiMessageAsync(message);
+        }
+
         /// <summary>
         /// Shows the tool window when the menu item is clicked.
         /// </summary>
@@ -83,20 +100,16 @@ namespace NeuroAssistant.UI
         /// <param name="e">The event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            // Start async window management without blocking UI thread
-            _package.JoinableTaskFactory.RunAsync(async delegate
+            _package.JoinableTaskFactory.RunAsync(async () =>
             {
-                // Request window creation from VS shell
-                ToolWindowPane window = await _package.ShowToolWindowAsync(typeof(NeuroAssistantWindow), 0, true, _package.DisposalToken);
-
-                // Validate window frame creation
-                if (window?.Frame == null)
-                {
-                    throw new NotSupportedException("Cannot create tool window");
-                }
-            })
-            // Register error handling for fire-and-forget operation
-            .FileAndForget("NeuroAssistantWindowCommand");
+                ToolWindowPane window = await _package.ShowToolWindowAsync(
+                    typeof(NeuroAssistantWindow),
+                    0,
+                    true,
+                    _package.DisposalToken
+                );
+                if (window?.Frame == null) throw new NotSupportedException("Cannot create tool window");
+            }).FileAndForget("NeuroAssistantWindowCommand");
         }
     }
 }

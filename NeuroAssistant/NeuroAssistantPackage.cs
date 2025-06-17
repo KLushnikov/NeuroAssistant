@@ -7,6 +7,7 @@ using NeuroAssistant.Ai;
 using NeuroAssistant.Ai.Profiles;
 using NeuroAssistant.Core.Services;
 using NeuroAssistant.Git;
+using NeuroAssistant.UI;
 using System;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
@@ -46,6 +47,8 @@ namespace NeuroAssistant
         private const int _createCommitMessageCommandId = 0x0100;
         private static readonly Guid _commandSet = new Guid("3A8FF9E2-2ACA-4DA8-A50B-4AB86BF264EE");
 
+        private Microsoft.Extensions.DependencyInjection.ServiceProvider _serviceProvider;
+
         #region Package Members
         protected override void InitializeServices(IServiceCollection services)
         {
@@ -53,11 +56,10 @@ namespace NeuroAssistant
             services.AddTransient<IVsSettingsStoreService, VsSettingsStoreService>();
             services.AddTransient<IAiProfileManager, AiProfileManager>();
 
-            services.AddSingleton<AiProfileManager>();
             services.AddTransient<AiAssistedService>();
 
             services.RegisterCommands(ServiceLifetime.Singleton);
-            var serviceProvider = services.BuildServiceProvider();
+            _serviceProvider = services.BuildServiceProvider();
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace NeuroAssistant
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            await UI.NeuroAssistantWindowCommand.InitializeAsync(this);
+            await NeuroAssistantWindowCommand.InitializeAsync(this);
 
             var commandService = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
 
@@ -91,6 +93,10 @@ namespace NeuroAssistant
                 GitDiffHelper diffHelper = new GitDiffHelper();
                 string diff = diffHelper.GetStagedDiff();
 
+                _ = Task.Run(async () =>
+                {
+                    await (NeuroAssistantWindowCommand.Instance?.SentMessageAsync(diff)).ConfigureAwait(false);
+                });
             }
             catch (Exception ex)
             {
