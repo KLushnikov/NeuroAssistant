@@ -1,13 +1,16 @@
 ﻿using Microsoft.VisualStudio.Shell;
+using NeuroAssistant.Ai;
 using NeuroAssistant.Ai.Connection;
 using NeuroAssistant.Ai.Profiles;
 using NeuroAssistant.Core;
 using NeuroAssistant.Core.Enum;
+using NeuroAssistant.Core.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -27,22 +30,25 @@ namespace NeuroAssistant.UI
     [Guid("1ac05b52-bbde-458c-8fab-d0bca63818e8")]
     public class NeuroAssistantWindow : ToolWindowPane, INotifyPropertyChanged
     {
-        private string _aiMessage;
+        public static Guid WindowGuid = new Guid("1ac05b52-bbde-458c-8fab-d0bca63818e8");
 
-        private string _aiProfileNameSelected;
+        private string _aiMessage, _aiResultContent, _aiProfileNameSelected;
         private IAiConnectionSettings _aiProfileSelected = null;
 
         private Visibility _aiMessageGridVisibility = Visibility.Visible,
             _settingGridVisibility = Visibility.Collapsed;
 
-        private IAiProfileManager _aiProfileManager;
+        private readonly AiAssistedService _aiAssistedService;
+        private readonly IAiProfileManager _aiProfileManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NeuroAssistantWindow"/> class.
         /// </summary>
-        public NeuroAssistantWindow(IAiProfileManager aiProfileManager) : base(null)
+        public NeuroAssistantWindow() : base(null)
         {
-            _aiProfileManager = aiProfileManager;
+            EncryptionService encryptionService = new EncryptionService();
+            VsSettingsStoreService vsSettingsStoreService = new VsSettingsStoreService(encryptionService);
+            _aiProfileManager = new AiProfileManager(vsSettingsStoreService);
 
             Caption = "Neuro Assistant";
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
@@ -52,8 +58,6 @@ namespace NeuroAssistant.UI
             {
                 DataContext = this
             };
-
-            Content = control;
 
             var profiles = _aiProfileManager.GetProfileIds();
 
@@ -77,6 +81,12 @@ namespace NeuroAssistant.UI
                 AiProfileSelected = new AiConnectionSettings();
                 SwitchShowSetting();
             }
+
+            AiConnectionSettings aiConnectionSettings = _aiProfileManager.LoadProfile<AiConnectionSettings>(AiProfileNameSelected) as AiConnectionSettings;
+            AiAssistedService aiAssistedService = new AiAssistedService(aiConnectionSettings);
+            _aiAssistedService = aiAssistedService;
+
+            Content = control;
 
             SaveSettingCommand = CommandFactory.CreateCommand(SaveSetting);
             CancelSettingCommand = CommandFactory.CreateCommand(CancelSetting);
@@ -198,8 +208,5 @@ namespace NeuroAssistant.UI
         // parameter causes the property name of the caller to be substituted as an argument.  
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-
-
     }
 }
